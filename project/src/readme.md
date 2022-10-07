@@ -1,6 +1,6 @@
 ### info
 
-`src` : contains all source files.
+`src` : contains all `python 3` source files and `data` folder.
 
 `data` : contains all data files.
 
