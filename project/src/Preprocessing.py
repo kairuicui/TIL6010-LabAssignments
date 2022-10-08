@@ -8,12 +8,13 @@ import pandas as pd
 # all functions will be declared as @classmethod thus they can directly be accessed without any instantiation
 class Preprocessing:
 
+
     @classmethod
     def load_data_csv(cls, filename:str) -> pd.DataFrame:
         print("loading dataset ...")
         # get file path - this should work on Windows / linux / Mac
         currentdir = os.path.join(os.path.dirname(__file__))
-        filepath = currentdir + "/data/owid-covid-data.csv"
+        filepath = currentdir + "/data/" + filename
 
         filename = path(filepath)
         if not filename.exists():
@@ -24,6 +25,7 @@ class Preprocessing:
             print("done")
         
         return data
+
 
     @classmethod
     def data_info(cls, data:pd.DataFrame) -> None:
@@ -44,6 +46,7 @@ class Preprocessing:
         # print info about each field
         print("info about each field")
         print(data.info())
+
 
     @classmethod
     def print(cls) -> None:
