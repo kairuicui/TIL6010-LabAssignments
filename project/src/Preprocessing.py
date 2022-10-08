@@ -120,7 +120,7 @@ class Preprocessing:
         else:
             print("missing attribute provided, will proceed")
 
-            __data = data # keeping the original dataset unchanged is desired in this function
+            __data = data # keeping the original dataset unchanged is (currently) desired in this function
 
             # for each Attri in missing_attribute_list, remove the rows which contain them
             for Attri in missing_attribute_list:
@@ -130,13 +130,36 @@ class Preprocessing:
             print("done")
 
             # validate
-            print("missing data info after NaN values removed --------------------------------------")
+            print("missing data info BEFORE NaN values removed --------------------------------------")
+            missing_data_info_before = data.isnull().sum().sort_values(ascending=False)
+            print(missing_data_info_before)
+            print()
+            print("missing data info AFTER  NaN values removed --------------------------------------")
             missing_data_info_after = __data.isnull().sum().sort_values(ascending=False)
             print(missing_data_info_after)
 
             # return the data after removing NaN records
             print("data with NaN values removed will be returned")
             return __data
+
+
+    # process the duplicate data in the dataset
+    # @return: a new dataframe
+    @classmethod
+    def process_duplicate_data(cls, data:pd.DataFrame, print_info:bool = False) -> pd.DataFrame:
+
+        # the info printed by data.duplicated() may not be very useful for the users
+        # since it just shows columns and true/false
+        # thus this function should allow users to select whether to print/not print the duplicated info
+        if print_info:
+            print("info about the duplicate data in the dataset: ----------------------------------------")
+            print(data.duplicated())
+        
+        # return the new dataset
+        # keep the original dataset unchanged, but this can be optimized in the future
+        # i.e. we only keep one copy of the original dataset in the main function
+        __data = data 
+        return __data.drop_duplicates()
 
 
     @classmethod
@@ -155,7 +178,11 @@ def main():
     Preprocessing.get_missing_data_info(original_data)
 
     # remove missing data
-    Preprocessing.process_missing_data_removing(original_data)
+    data_without_nan_values = Preprocessing.process_missing_data_removing(original_data)
+
+    # process duplicate data
+    data_without_duplicates = Preprocessing.process_duplicate_data(data_without_nan_values)
+    print(data_without_duplicates.duplicated()) # validate
     pass
 
 if __name__ == "__main__":
