@@ -1,6 +1,7 @@
 import os
 from pathlib import Path as path
 import pandas as pd
+import numpy as np
 
 # class - Preprocessing:
 # a class that encapsulates some common functions to preprocess the data
@@ -181,15 +182,35 @@ class Preprocessing:
         return __data.drop_duplicates()
 
 
+    # process outliers
+    # @param: multi - a multiplier, elements greater than multi times the standard deviation are considered outliers
     @classmethod
-    def print(cls) -> None:
-        print("test preprocessing function")
+    def process_outlier_data(cls, data:pd.DataFrame, multi:float=3.0) -> pd.DataFrame:
+        print("basic statistics info: ------")
+        print(data.describe())
+
+        __data = data # same, currently save a copy of the original data
+
+        # for the fields which are numbers, the following script will get rid of the records which are bigger than
+        # multi times of its std values
+        # \example
+        # data = pd.DataFrame(np.random.randn(1000,3))
+        # print(data)
+        # print(data.describe())
+        # print(data.std())
+        # print(data[(np.abs(data)>(3*data.std())).any(1)])
+        # \example
+        # it should be noted -> only for attributes whose value type are numerical numbers
+
+        # validation
+        print("before the shape is {0}".format(data.shape))
+        print("after the shape is {0}".format(__data.shape))
+
+        return __data
 
     
-
 def main():
     # entry point
-    #Preprocessing.print()
     original_data = Preprocessing.load_data_csv("road_pa_mov_linear.csv")
     #Preprocessing.data_info(original_data)
 
@@ -202,6 +223,9 @@ def main():
     # process duplicate data
     data_without_duplicates = Preprocessing.process_duplicate_data(data_without_nan_values)
     print(data_without_duplicates.duplicated()) # validate
+
+    # process outlier data
+    #data_without_outliers = Preprocessing.process_outlier_data(data_without_duplicates, multi=3.0)
     pass
 
 if __name__ == "__main__":
