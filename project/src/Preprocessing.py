@@ -106,44 +106,60 @@ class Preprocessing:
     # process NaN values in the dataset (if any) according to the missing attributes
     # @return: a new dataset
     @classmethod
-    def process_missing_data_removing(cls, data:pd.DataFrame) -> pd.DataFrame:
-        # warning 
-        print("WARNING: -----------------------------------------------------------------------")
-        print("process_missing_data_removing is being called")
-        print("this function will remove all rows with NaN values, please proceed with caution")
-        print()
+    def process_missing_data(cls, data:pd.DataFrame, mode:str='REMOVE') -> pd.DataFrame:
 
-        # get missing_attribute_list
-        missing_attribute_list = Preprocessing.get_missing_attribute_list(data)
+        # different mode enables different filling operations
+        match mode.strip(): # mode may contain spaces, i.e. mode='REMOVE '
+            case 'REMOVE':
+                # warning 
+                print("WARNING: -----------------------------------------------------------------------")
+                print("process_missing_data_removing is being called")
+                print("this function will remove all rows with NaN values, please proceed with caution")
+                print()
 
-        # if missing_attribute_list is empty / not empty
-        if not missing_attribute_list:
-            print("no missing attributes provided, will return an empty pandas.DataFrame object")
-            return pd.DataFrame()
-        else:
-            print("missing attribute provided, will proceed")
+                # get missing_attribute_list
+                missing_attribute_list = Preprocessing.get_missing_attribute_list(data)
 
-            __data = data # keeping the original dataset unchanged is (currently) desired in this function
+                # if missing_attribute_list is empty / not empty
+                if not missing_attribute_list:
+                    print("no missing attributes provided, will return an empty pandas.DataFrame object")
+                    return pd.DataFrame()
+                else:
+                    print("missing attribute provided, will proceed")
 
-            # for each Attri in missing_attribute_list, remove the rows which contain them
-            for Attri in missing_attribute_list:
-                print("removing all rows with {0} == NULL".format(Attri))
-                __data = __data.drop(__data[__data[Attri].isnull()].index)
-            
-            print("done")
+                    __data = data # keeping the original dataset unchanged is (currently) desired in this function
 
-            # validate
-            print("missing data info BEFORE NaN values removed --------------------------------------")
-            missing_data_info_before = data.isnull().sum().sort_values(ascending=False)
-            print(missing_data_info_before)
-            print()
-            print("missing data info AFTER  NaN values removed --------------------------------------")
-            missing_data_info_after = __data.isnull().sum().sort_values(ascending=False)
-            print(missing_data_info_after)
+                    # for each Attri in missing_attribute_list, remove the rows which contain them
+                    for Attri in missing_attribute_list:
+                        print("removing all rows with {0} == NULL".format(Attri))
+                        __data = __data.drop(__data[__data[Attri].isnull()].index)
+                    
+                    print("done")
 
-            # return the data after removing NaN records
-            print("data with NaN values removed will be returned")
-            return __data
+                    # validate
+                    print("missing data info BEFORE NaN values removed --------------------------------------")
+                    missing_data_info_before = data.isnull().sum().sort_values(ascending=False)
+                    print(missing_data_info_before)
+                    print()
+                    print("missing data info AFTER  NaN values removed --------------------------------------")
+                    missing_data_info_after = __data.isnull().sum().sort_values(ascending=False)
+                    print(missing_data_info_after)
+
+                    # return the data after removing NaN records
+                    print("data with NaN values removed will be returned")
+                    return __data
+                
+            case 'MEDIAN':
+                # filling the NaN data with median values
+                pass
+            case 'AVG':
+                # filling the NaN data with avg values
+                pass
+        
+        # end of match, return an empty dataframe object
+        print("WARNING: no mode selected in process_missing_data() function")
+        print("an empty pandas.DataFrame object will be returned")
+        return pd.DataFrame()
 
 
     # process the duplicate data in the dataset
@@ -181,7 +197,7 @@ def main():
     Preprocessing.get_missing_data_info(original_data)
 
     # remove missing data
-    data_without_nan_values = Preprocessing.process_missing_data_removing(original_data)
+    data_without_nan_values = Preprocessing.process_missing_data(original_data, mode='REMOVE  ')
 
     # process duplicate data
     data_without_duplicates = Preprocessing.process_duplicate_data(data_without_nan_values)
