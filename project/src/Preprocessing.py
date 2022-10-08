@@ -19,12 +19,12 @@ class Preprocessing:
         filename = path(filepath)
         if not filename.exists():
             print(" file doesn't exist ")
+            return pd.DataFrame() # if not found return a empty dataframe
         else:
             print(" found file ")
             data = pd.read_csv(filename)
             print("done")
-        
-        return data
+            return data
 
 
     @classmethod
@@ -55,7 +55,7 @@ class Preprocessing:
 def main():
     # entry point
     Preprocessing.print()
-    data = Preprocessing.load_data_csv("/owid-covid-data.csv")
+    data = Preprocessing.load_data_csv("road_pa_mov_linear.csv")
     Preprocessing.data_info(data)
     pass
 
