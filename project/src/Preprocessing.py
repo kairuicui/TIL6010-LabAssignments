@@ -8,6 +8,9 @@ import pandas as pd
 # all functions will be declared as @classmethod thus they can directly be accessed without any instantiation
 class Preprocessing:
 
+    # file structure:
+    # src -> all python source files
+    # src/data -> data folder
     @classmethod
     def load_data_csv(cls, filename:str) -> pd.DataFrame:
         print("loading dataset ...")
