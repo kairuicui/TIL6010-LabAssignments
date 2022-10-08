@@ -52,6 +52,9 @@ class Preprocessing:
     # @return: None
     @classmethod
     def get_missing_data_info(cls, data:pd.DataFrame) -> None:
+        print("missing data info about the dataset: ")
+        print()
+
         # get the fields with NaN values and sort
         total_missing_data_info = data.isnull().sum().sort_values(ascending=False)
         print("field - with - NaN - values ----------------------------------------------------")
@@ -64,6 +67,7 @@ class Preprocessing:
         missing_data = pd.concat([total_missing_data_info, missing_data_percentage], axis=1, keys=['Total numbers', 'Percentage'])
         print("info about missing_data ---------------------------------------------------------")
         print(missing_data)
+        print()
         
 
     # get missing attribute list
@@ -100,16 +104,39 @@ class Preprocessing:
     # @return: a new dataset
     @classmethod
     def process_missing_data_removing(cls, data:pd.DataFrame) -> pd.DataFrame:
-
-        Attri = 'OBS_VALUE' # specify the column here - this can be different for different dataset
-        print("removing all rows with {0} == NULL".format(Attri))
-        data_with_missing_removed = data.drop(data[data[Attri].isnull()].index)
-        print("done")
+        # warning 
+        print("WARNING: -----------------------------------------------------------------------")
+        print("process_missing_data_removing is being called")
+        print("this function will remove all rows with NaN values, please proceed with caution")
         print()
 
-        print("missing data info after NaN values removed --------------------------------------")
-        missing_data_info_after = data_with_missing_removed.isnull().sum().sort_values(ascending=False)
-        print(missing_data_info_after)
+        # get missing_attribute_list
+        missing_attribute_list = Preprocessing.get_missing_attribute_list(data)
+
+        # if missing_attribute_list is empty / not empty
+        if not missing_attribute_list:
+            print("no missing attributes provided, will return an empty pandas.DataFrame object")
+            return pd.DataFrame()
+        else:
+            print("missing attribute provided, will proceed")
+
+            __data = data # keeping the original dataset unchanged is desired in this function
+
+            # for each Attri in missing_attribute_list, remove the rows which contain them
+            for Attri in missing_attribute_list:
+                print("removing all rows with {0} == NULL".format(Attri))
+                __data = __data.drop(__data[__data[Attri].isnull()].index)
+            
+            print("done")
+
+            # validate
+            print("missing data info after NaN values removed --------------------------------------")
+            missing_data_info_after = __data.isnull().sum().sort_values(ascending=False)
+            print(missing_data_info_after)
+
+            # return the data after removing NaN records
+            print("data with NaN values removed will be returned")
+            return __data
 
 
     @classmethod
@@ -123,9 +150,12 @@ def main():
     #Preprocessing.print()
     original_data = Preprocessing.load_data_csv("road_pa_mov_linear.csv")
     #Preprocessing.data_info(original_data)
+
+    # get info about missing data
     Preprocessing.get_missing_data_info(original_data)
-    Preprocessing.get_missing_attribute_list(original_data)
-    #data_without_nan_values = Preprocessing.process_nan_values(original_data)
+
+    # remove missing data
+    Preprocessing.process_missing_data_removing(original_data)
     pass
 
 if __name__ == "__main__":
