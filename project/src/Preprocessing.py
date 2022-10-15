@@ -105,7 +105,7 @@ class Preprocessing:
     # extra care needs to be taken -> some attributes are not really 'NaN', there can be intervals
     # i.e., an attribute can be recorded every for example 10 rows
     # process NaN values in the dataset (if any) according to the missing attributes
-    # @return: a new dataset
+    # @return: pd.DataFrame
     @classmethod
     def process_missing_data(cls, data:pd.DataFrame, mode:str='REMOVE') -> pd.DataFrame:
 
@@ -123,32 +123,29 @@ class Preprocessing:
 
                 # if missing_attribute_list is empty / not empty
                 if not missing_attribute_list:
-                    print("no missing attributes provided, will return an empty pandas.DataFrame object")
-                    return pd.DataFrame()
+                    print("no missing attributes provided, will not process missing data")
+                    return
                 else:
                     print("missing attribute provided, will proceed")
 
-                    __data = data # keeping the original dataset unchanged is (currently) desired in this function
-
-                    # for each Attri in missing_attribute_list, remove the rows which contain them
-                    for Attri in missing_attribute_list:
-                        print("removing all rows with {0} == NULL".format(Attri))
-                        __data = __data.drop(__data[__data[Attri].isnull()].index)
-                    
-                    print("done")
-
-                    # validate
+                    # before removing
                     print("missing data info BEFORE NaN values removed --------------------------------------")
                     missing_data_info_before = data.isnull().sum().sort_values(ascending=False)
                     print(missing_data_info_before)
                     print()
-                    print("missing data info AFTER  NaN values removed --------------------------------------")
-                    missing_data_info_after = __data.isnull().sum().sort_values(ascending=False)
-                    print(missing_data_info_after)
 
-                    # return the data after removing NaN records
-                    print("data with NaN values removed will be returned")
-                    return __data
+                    # remove the missing data
+                    # for each Attri in missing_attribute_list, remove the rows which contain them
+                    for Attri in missing_attribute_list:
+                        print("removing all rows with {0} == NULL".format(Attri))
+                        data = data.drop(data[data[Attri].isnull()].index)
+                    
+                    print("done")
+
+                    # validate                   
+                    print("missing data info AFTER  NaN values removed --------------------------------------")
+                    missing_data_info_after = data.isnull().sum().sort_values(ascending=False)
+                    print(missing_data_info_after)
                 
             case 'MEDIAN':
                 # filling the NaN data with median values
@@ -157,10 +154,8 @@ class Preprocessing:
                 # filling the NaN data with avg values
                 pass
         
-        # end of match, return an empty dataframe object
-        print("WARNING: no mode selected in process_missing_data() function")
-        print("an empty pandas.DataFrame object will be returned")
-        return pd.DataFrame()
+        # end of match
+        return data
 
 
     # process the duplicate data in the dataset
@@ -175,11 +170,8 @@ class Preprocessing:
             print("info about the duplicate data in the dataset: ----------------------------------------")
             print(data.duplicated())
         
-        # return the new dataset
-        # keep the original dataset unchanged, but this can be optimized in the future
-        # i.e. we only keep one copy of the original dataset in the main function
-        __data = data 
-        return __data.drop_duplicates()
+        # return the new dataset after removing duplicates
+        return data.drop_duplicates()
 
 
     # process outliers
@@ -188,8 +180,6 @@ class Preprocessing:
     def process_outlier_data(cls, data:pd.DataFrame, multi:float=3.0) -> pd.DataFrame:
         print("basic statistics info: ------")
         print(data.describe())
-
-        __data = data # same, currently save a copy of the original data
 
         # for the fields which are numbers, the following script will get rid of the records which are bigger than
         # multi times of its std values
@@ -204,25 +194,27 @@ class Preprocessing:
 
         # validation
         print("before the shape is {0}".format(data.shape))
-        print("after the shape is {0}".format(__data.shape))
+        print("after the shape is {0}".format(data.shape))
 
-        return __data
+        return data
 
     
 def main():
     # entry point
-    original_data = Preprocessing.load_data_csv("road_pa_mov_linear.csv")
-    #Preprocessing.data_info(original_data)
+    data = Preprocessing.load_data_csv("road_pa_mov_linear.csv")
+    print(data)
+    #Preprocessing.data_info(data)
 
     # get info about missing data
-    Preprocessing.get_missing_data_info(original_data)
+    Preprocessing.get_missing_data_info(data)
 
     # remove missing data
-    data_without_nan_values = Preprocessing.process_missing_data(original_data, mode='REMOVE  ')
+    data = Preprocessing.process_missing_data(data, mode='REMOVE')
 
     # process duplicate data
-    data_without_duplicates = Preprocessing.process_duplicate_data(data_without_nan_values)
-    print(data_without_duplicates.duplicated()) # validate
+    data = Preprocessing.process_duplicate_data(data)
+    print(data.duplicated()) # validate
+    print(data)
 
     # process outlier data
     #data_without_outliers = Preprocessing.process_outlier_data(data_without_duplicates, multi=3.0)
